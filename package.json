@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "author": "theMuseCatcher",
-  "description": "基于 React + TypeScript + Vite + Less 开发的模板项目",
+  "description": "基于 React + TypeScript + Vite + Sass/Less 开发的模板项目",
   "scripts": {
     "dev": "vite",
     "push": "sh scripts/push.sh",

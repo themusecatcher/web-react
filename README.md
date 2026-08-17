@@ -1,6 +1,6 @@
 # web-react
 
-_基于最新技术栈 `react@^19.2.8`+ `typescript@^5.9.3` + `vite@^8.2.1` + `sass/less` 开发的模板项目_
+_基于 `react@^19.2.8`+ `typescript@^5.9.3` + `vite@^8.2.1` + `sass/less` 开发的模板项目_
 
 ## References
 
