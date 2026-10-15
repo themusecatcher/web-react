@@ -1,6 +1,16 @@
+import type { MessageInstance } from 'antd/es/message/interface'
+import type { HookAPI as ModalHookAPI } from 'antd/es/modal/useModal'
+
 export {}
 
 declare global {
+  // antd 命令式 api，由 App.tsx 中 <App> 的 useApp 挂载到 window，
+  // 供 axios 拦截器等组件外场景调用；应用卸载后移除，故为可选
+  interface Window {
+    $message?: MessageInstance
+    $modal?: ModalHookAPI
+  }
+
   const __APP_INFO__: {
     pkg: {
       name: string
