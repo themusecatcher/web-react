@@ -11,6 +11,7 @@
     "tag": "sh scripts/tag.sh",
     "build": "run-s format clean build-only",
     "format": "prettier --write src/",
+    "format:check": "prettier --check src/",
     "clean": "rimraf ./dist",
     "type-check": "tsc --build --force",
     "build-only": "vite build && esno ./build/script/postBuild.ts",
@@ -18,7 +19,9 @@
     "analyze": "vite build --mode analyze",
     "lint": "eslint . --fix",
     "lint:check": "eslint .",
-    "check": "run-s lint:check type-check",
+    "check": "run-s lint:check format:check type-check",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "prepare": "husky"
   },
   "dependencies": {
@@ -57,6 +60,7 @@
     "esno": "^4.8.0",
     "fs-extra": "^11.3.2",
     "globals": "^16.4.0",
+    "happy-dom": "^20.14.6",
     "husky": "^9.1.7",
     "less": "^4.4.2",
     "lint-staged": "^16.2.6",
@@ -74,7 +78,8 @@
     "vite-plugin-html": "^3.2.2",
     "vite-plugin-inspect": "^12.0.2",
     "vite-plugin-mock": "^3.0.2",
-    "vite-plugin-svgr": "^5.2.0"
+    "vite-plugin-svgr": "^5.2.0",
+    "vitest": "4.1.11"
   },
   "keywords": [
     "React",
@@ -86,9 +91,10 @@
     "AntDesign",
     "Out-of-the-box"
   ],
+  "packageManager": "pnpm@11.24.0",
   "engines": {
     "node": ">=20.19.0",
-    "pnpm": ">=9"
+    "pnpm": ">=11"
   },
   "browserslist": [
     "> 1%",
@@ -101,6 +107,9 @@
       "eslint --fix"
     ],
     "*.{html,css,less,scss}": [
+      "prettier --write"
+    ],
+    "*.json": [
       "prettier --write"
     ],
     "*.md": [
