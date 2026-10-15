@@ -31,3 +31,6 @@ coverage
 
 # Browser MCP debug artifacts
 .playwright-mcp/
+
+# 构建分析产物（rollup-plugin-visualizer 输出，由 pnpm analyze 生成）
+stats.html
