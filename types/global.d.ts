@@ -44,30 +44,31 @@ declare global {
     target: HTMLInputElement
   }
 
-  interface ImportMetaEnv extends ViteEnv {
-    __: unknown
-  }
+  // 收敛 import.meta.env 的具体键类型（与 vite/client 的索引签名合并，保留自动补全）；
+  // 空扩展接口为有意的接口合并模式，仅为挂载 ViteEnv 键类型
+  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
+  interface ImportMetaEnv extends ViteEnv {}
 
   declare interface ViteEnv {
-    VITE_PORT: number
-    VITE_USE_MOCK: boolean
-    VITE_USE_PWA: boolean
+    // 仅开发模式定义（vite.config.ts server 配置消费）
+    VITE_PORT?: number
+    VITE_PROXY?: [string, string][]
+    VITE_ENABLE_INSPECT?: boolean
+    // 是否开启 mock（development 为 true，production/analyze 为 false/未定义）
+    VITE_USE_MOCK?: boolean
     VITE_PUBLIC_PATH: string
-    VITE_PROXY: [string, string][]
     VITE_GLOB_APP_TITLE: string
     VITE_GLOB_APP_SHORT_NAME: string
-    VITE_USE_CDN: boolean
+    // 仅生产/分析模式定义（createVitePlugins 消费）
+    VITE_USE_CDN?: boolean
     // 注：运行时支持逗号组合（如 'gzip,brotli' 同时输出两种压缩产物），此处类型仅约束常规单值写法
-    VITE_BUILD_COMPRESS: 'gzip' | 'brotli' | 'none'
-    VITE_BUILD_COMPRESS_DELETE_ORIGIN_FILE: boolean
-    VITE_ENABLE_ANALYZE: boolean
-    VITE_ENABLE_INSPECT: boolean
-    VITE_LEGACY: boolean
-    VITE_USE_IMAGEMIN: boolean
-    VITE_GENERATE_UI: string
+    VITE_BUILD_COMPRESS?: 'gzip' | 'brotli' | 'none'
+    VITE_BUILD_COMPRESS_DELETE_ORIGIN_FILE?: boolean
+    VITE_ENABLE_ANALYZE?: boolean
+    // 运行时全局配置（app.config.js 注入，见 utils/env.ts getAppEnvConfig）
+    VITE_GLOB_API_URL: string
+    VITE_GLOB_API_URL_PREFIX?: string
+    VITE_GLOB_UPLOAD_URL?: string
+    VITE_GLOB_IMG_URL?: string
   }
-
-  declare function parseInt(s: string | number, radix?: number): number
-
-  declare function parseFloat(string: string | number): number
 }

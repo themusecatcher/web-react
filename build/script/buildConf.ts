@@ -20,13 +20,9 @@ function createConfig(
   try {
     const windowConf = `window.${configName}`
     // Ensure that the variable will not be modified
-    const configStr = `${windowConf}=${JSON.stringify(config)};
-      Object.freeze(${windowConf});
-      Object.defineProperty(window, "${configName}", {
-        configurable: false,
-        writable: false,
-      });
-    `.replace(/\s/g, '')
+    // 注意：不能用 .replace(/\s/g, '') 压缩产物——它会把字符串值内的空格一并剥掉
+    // （如 title "Web React Template" 被腐蚀为 "WebReactTemplate"），改为直接输出单行
+    const configStr = `${windowConf}=${JSON.stringify(config)};Object.freeze(${windowConf});Object.defineProperty(window,"${configName}",{configurable:false,writable:false});`
     fs.mkdirp(getRootPath(OUTPUT_DIR))
     fs.outputFileSync(getRootPath(`${OUTPUT_DIR}/${configFileName}`), configStr)
 

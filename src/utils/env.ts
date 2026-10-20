@@ -20,7 +20,8 @@ export function getAppEnvConfig() {
   const ENV = (import.meta.env.DEV
     ? // Get the global configuration (the configuration will be extracted independently when packaging)
       (import.meta.env as unknown as GlobEnvConfig)
-    : window[ENV_NAME as any]) as unknown as GlobEnvConfig
+    : // postBuild 失败或 window 上无对应配置变量时降级为空配置，避免解构 undefined 导致崩溃
+      (window[ENV_NAME as any] ?? {})) as unknown as GlobEnvConfig
   // const ENV = import.meta.env as unknown as GlobEnvConfig
   const {
     VITE_GLOB_APP_TITLE,
@@ -28,7 +29,6 @@ export function getAppEnvConfig() {
     VITE_GLOB_APP_SHORT_NAME,
     VITE_GLOB_API_URL_PREFIX,
     VITE_GLOB_UPLOAD_URL,
-    VITE_GLOB_PROD_MOCK,
     VITE_GLOB_IMG_URL
   } = ENV
 
@@ -44,7 +44,6 @@ export function getAppEnvConfig() {
     VITE_GLOB_APP_SHORT_NAME,
     VITE_GLOB_API_URL_PREFIX,
     VITE_GLOB_UPLOAD_URL,
-    VITE_GLOB_PROD_MOCK,
     VITE_GLOB_IMG_URL
   }
 }

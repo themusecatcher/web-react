@@ -10,11 +10,11 @@ export const getGlobSetting = (): Readonly<GlobConfig> => {
     VITE_GLOB_APP_SHORT_NAME,
     VITE_GLOB_API_URL_PREFIX,
     VITE_GLOB_UPLOAD_URL,
-    VITE_GLOB_PROD_MOCK,
     VITE_GLOB_IMG_URL
   } = getAppEnvConfig()
 
-  if (!/[a-zA-Z_]*/.test(VITE_GLOB_APP_SHORT_NAME)) {
+  // 与 utils/env.ts 的校验保持一致：缺少 ^$ 锚点时正则恒匹配，告警永不触发
+  if (!/^[a-zA-Z_]*$/.test(VITE_GLOB_APP_SHORT_NAME)) {
     warn(
       `VITE_GLOB_APP_SHORT_NAME Variables can only be characters/underscores, please modify in the environment variables and re-running.`
     )
@@ -27,7 +27,6 @@ export const getGlobSetting = (): Readonly<GlobConfig> => {
     shortName: VITE_GLOB_APP_SHORT_NAME,
     urlPrefix: VITE_GLOB_API_URL_PREFIX,
     uploadUrl: VITE_GLOB_UPLOAD_URL,
-    prodMock: VITE_GLOB_PROD_MOCK,
     imgUrl: VITE_GLOB_IMG_URL
   }
   return glob as Readonly<GlobConfig>
