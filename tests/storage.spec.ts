@@ -106,6 +106,25 @@ describe('Storage - Cookie 操作', () => {
     expect(storage.getCookie('theme')).toBe('dark')
   })
 
+  it('expire 为 null 时应写入有效会话级 cookie', () => {
+    // 旧实现拼出 "Max-Age=null" 使整条 cookie 无效、读回为空，此处锁定 null 分支
+    storage.setCookie('session', 'v', null)
+    expect(storage.getCookie('session')).toBe('v')
+  })
+
+  it('cookie 值应编码写入、解码读出，特殊字符不破坏结构', () => {
+    storage.setCookie('complex', 'a=b; c,d 中文')
+    // 未编码的 ';' 会截断 cookie 并注入额外属性，编码后不应出现原始分隔符
+    expect(document.cookie).not.toContain('a=b; c,d')
+    expect(storage.getCookie('complex')).toBe('a=b; c,d 中文')
+  })
+
+  it('历史未编码写入的脏值应原样返回，不抛错', () => {
+    // 模拟旧版/外部写入的含孤立 '%' 的值：decodeURIComponent 会抛 URIError，应降级原样返回
+    document.cookie = 'LEGACY=100%'
+    expect(storage.getCookie('legacy')).toBe('100%')
+  })
+
   it('cookie 名同样走前缀大写归一', () => {
     const prefixed = new Storage('APP_')
     prefixed.setCookie('lang', 'zh')
