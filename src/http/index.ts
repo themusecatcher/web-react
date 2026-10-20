@@ -7,7 +7,7 @@ import { joinTimestamp, formatRequestDate } from './helper'
 import { isString } from 'utils/is'
 import { deepMerge, isUrl, setObjToUrlParams } from 'utils/index'
 import { getGlobSetting } from 'hooks/setting'
-import { RequestEnum, ContentTypeEnum, ConfigEnum } from 'enums/httpEnum'
+import { RequestEnum, ContentTypeEnum } from 'enums/httpEnum'
 // import { encryptData } from 'utils/signature/encrypt'
 const globSetting = getGlobSetting()
 const urlPrefix = globSetting.urlPrefix || ''
@@ -70,16 +70,13 @@ const transform: AxiosTransform = {
    */
   requestInterceptors: (config, options) => {
     // 请求之前处理 config
-    const token = null
-    // console.log('config', config)
-    // console.log('options', options)
-    if (token && (config as Recordable)?.requestOptions?.withToken !== false) {
-      // jwt token
-      ;(config.headers as Recordable).Authorization = options.authenticationScheme
-        ? `${options.authenticationScheme} ${token}`
-        : token
-      ;(config.headers as Recordable)[ConfigEnum.TOKEN] = token
-    }
+    // TODO: 接入登录态后在此读取 token 并注入，参考：
+    // if (token && (config as Recordable)?.requestOptions?.withToken !== false) {
+    //   ;(config.headers as Recordable).Authorization = options.authenticationScheme
+    //     ? `${options.authenticationScheme} ${token}`
+    //     : token
+    //   ;(config.headers as Recordable)['X-Access-Token'] = token
+    // }
     return config
   },
   /**
@@ -95,29 +92,30 @@ const transform: AxiosTransform = {
   responseInterceptorsCatch: (error: any) => {
     const { response, code, message } = error || {}
     // TODO 此处要根据后端接口返回格式修改
-    const msg: string = response && response.data && response.data.message ? response.data.message : ''
-    const err: string = error.toString()
-    try {
-      if (code === 'ECONNABORTED' && message.indexOf('timeout') !== -1) {
-        console.log('接口请求超时，请刷新页面重试!')
-        return
-      }
-      if (err && err.includes('Network Error')) {
-        console.log('网络异常，请检查您的网络连接是否正常')
-        return Promise.reject(error)
-      }
-    } catch (error) {
-      throw new Error(error as any)
+    const msg: string = response?.data?.message ? response.data.message : ''
+    // error 为空值时兜底，避免这一行成为整段处理中唯一会抛错的地方
+    const err: string = String(error ?? '')
+    // 用 includes 而非 indexOf(...) !== -1：message 缺失时前者为 undefined（falsy），
+    // 不会像后者那样恒真而把超时判断退化成只判 code
+    if (code === 'ECONNABORTED' && message?.includes('timeout')) {
+      console.log('接口请求超时，请刷新页面重试!')
+      return Promise.reject(error)
+    }
+    if (err && err.includes('Network Error')) {
+      console.log('网络异常，请检查您的网络连接是否正常')
+      return Promise.reject(error)
     }
     // 请求是否被取消
     const isCancel = axios.isCancel(error)
     if (!isCancel) {
-      checkStatus(error.response && error.response.status, msg)
+      checkStatus(error?.response?.status, msg)
     } else {
       console.warn(error, '请求被取消！')
     }
     //return Promise.reject(error);
-    return Promise.reject(response?.data)
+    // 网络层错误（无 response）时不能 reject(undefined)：调用方 catch 后访问 e.message 会二次崩溃。
+    // 有响应体时保持既有契约（reject 业务返回体），无响应体则退回 reject 原始 error
+    return Promise.reject(response?.data ?? error)
   }
 }
 function createAxios(opt?: Partial<CreateAxiosOptions>) {
