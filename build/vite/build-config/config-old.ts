@@ -3,7 +3,8 @@
  *
  * 环境依赖要求：
  * - Vite ≤ 7.x：底层打包器为 Rollup，压缩器默认 esbuild
- *   （Vite 8 起已切换为 Rolldown，本配置中 rollupOptions 在 Vite 8 下为其弃用别名，行为兼容但会有弃用提示）
+ *   （Vite 8 起已切换为 Rolldown，本配置中 rollupOptions 在 Vite 8 下为其弃用别名，行为兼容；
+ *     Vite 8 运行时不会打印 rollupOptions 弃用警告，弃用提示仅出现在类型/IDE 层，见 @deprecated 标注）
  * - Terser：minify 使用 'terser' 时需安装 `pnpm i terser -D`
  * - Node ≥ 20.19.0（见 package.json engines）
  *
@@ -63,7 +64,7 @@ export function createOldBuildConfig(isBuild: boolean): BuildOptions {
         }
         // 【未来 vendors 包膨胀时的细分配置（预置，按需启用）】当 vendors 包显著增大（如 > 500 kB）时，替换上方函数形式为下方对象形式：
         // manualChunks: {
-        //   'react-vendor': ['react', 'react-dom', 'react-router-dom', 'zustand', 'ahooks'],
+        //   'react-vendor': ['react', 'react-dom', 'react-router-dom', 'zustand'],
         //   'antd-vendor': ['antd'],
         //   'utils-vendor': ['axios', 'lodash-es', 'qs', 'date-fns']
         // }

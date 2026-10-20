@@ -5,13 +5,11 @@
     "src/**/*.ts",
     "src/**/*.tsx",
     "types/**/*.d.ts",
-    "build/*.ts",
-    "build/**/*.ts",
+    // src/utils/env.ts 依赖此文件生成运行时配置变量名，故单独保留；其余 build 文件统一由 tsconfig.node.json 编译
+    "build/getConfigFileName.ts",
     "mock/**/*.ts",
     "tests/**/*",
-    "*.d.ts",
-    "vite.config.ts",
-    "vitest.config.ts"
+    "*.d.ts"
   ],
   "exclude": ["node_modules", "dist"],
   "compilerOptions": {

@@ -33,7 +33,7 @@ pnpm dev
 pnpm format
 ```
 
-## Format, Type-Check, Compile and Minify for Production
+## Clean, Compile, Minify and Generate Runtime Config for Production
 
 ```sh
 pnpm build

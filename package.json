@@ -8,10 +8,9 @@
   "scripts": {
     "dev": "vite",
     "push": "sh scripts/push.sh",
-    "tag": "sh scripts/tag.sh",
-    "build": "run-s format clean build-only",
-    "format": "prettier --write src/",
-    "format:check": "prettier --check src/",
+    "build": "run-s clean build-only",
+    "format": "prettier --write src/ build/ tests/ mock/",
+    "format:check": "prettier --check src/ build/ tests/ mock/",
     "clean": "rimraf ./dist",
     "type-check": "tsc --build --force",
     "build-only": "vite build && esno ./build/script/postBuild.ts",
@@ -25,8 +24,6 @@
     "prepare": "husky"
   },
   "dependencies": {
-    "@ant-design/icons": "^5.6.1",
-    "ahooks": "^3.9.7",
     "antd": "^5.29.3",
     "axios": "^1.13.2",
     "date-fns": "^4.1.0",
@@ -44,8 +41,10 @@
     "@eslint/js": "^9.39.1",
     "@tsconfig/node22": "^22.0.5",
     "@types/fs-extra": "^11.0.4",
+    "@types/lodash-es": "^4.17.12",
     "@types/mockjs": "^1.0.10",
     "@types/node": "^24.10.1",
+    "@types/qs": "^6.15.1",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.4",
     "@vitejs/devtools": "^0.4.12",
@@ -113,8 +112,7 @@
       "prettier --write"
     ],
     "*.md": [
-      "prettier --write --parser markdown --prose-wrap never",
-      "eslint --fix"
+      "prettier --write --parser markdown --prose-wrap never"
     ]
   }
 }

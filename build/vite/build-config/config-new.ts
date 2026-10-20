@@ -25,6 +25,8 @@ export function createNewBuildConfig(isBuild: boolean): BuildOptions {
     minify: 'oxc', // 类型：boolean | 'oxc' | 'terser' | 'esbuild'，客户端构建默认为 'oxc'，SSR 构建默认为 false
     // 备选压缩器 terser（Vite 8 下仍可用）：需先安装 terser（pnpm i terser -D）
     // 切换方式：将上方 minify 改为 'terser' 并取消注释下方 terserOptions
+    // ⚠️ 同时必须注释掉下方 rolldownOptions.output.minify 块：该块会覆盖 Vite 依据 build.minify 推导出的压缩配置，
+    //    否则 OXC 与 terser 会先后各压缩一次（双重压缩，产物无收益且构建变慢）
     // minify: 'terser',
     // terserOptions: {
     //   // 在打包代码时移除 console、debugger 和注释
@@ -50,22 +52,19 @@ export function createNewBuildConfig(isBuild: boolean): BuildOptions {
         },
         // 打包优化（等价于旧版 manualChunks 的 vendors 分组）：将不常变动的第三方依赖包统一放到 vendors 包中，这样每次打包时，vendors 包都保持不变，从而实现缓存
         // Vite 8 中 output.manualChunks 已弃用，改用 Rolldown 的 codeSplitting.groups
-        // 旧版 group-user 手动分组如仍需使用，在 groups 数组中追加对应分组即可，如：{ test: /src\/views\/User/, name: 'group-user' }
+        // 旧版 group-user 手动分组如仍需使用，在 groups 数组中追加对应分组即可，如：{ test: /src[\\/]views[\\/]User/, name: 'group-user' }
         // https://rolldown.rs/reference/OutputOptions.codeSplitting
         //
-        // 打包优化（等价于旧版 manualChunks 的 vendors 分组）：将不常变动的第三方依赖包统一放到 vendors 包中，这样每次打包时，vendors 包都保持不变，从而实现缓存
-        // Vite 8 中 output.manualChunks 已弃用，改用 Rolldown 的 codeSplitting.groups
-        // 旧版 group-user 手动分组如仍需使用，在 groups 数组中追加对应分组即可，如：{ test: /src\/views\/User/, name: 'group-user' }
-        // https://rolldown.rs/reference/OutputOptions.codeSplitting
-        //
-        // 注意：groups 按数组顺序匹配，命中即归组，故细分规则必须排在宽泛规则之前（兜底分组放最后）。
+        // 注意：groups 默认 priority 均为 0，此时按数组顺序匹配，命中即归组（模块被某分组收编后不再进入其它分组），
+        // 故细分规则必须排在宽泛规则之前（兜底分组放最后）；需要显式调序时也可用 priority 字段。
+        // 注意：test 正则中的路径分隔符写作 [\\/]（兼容 Windows），这是 Rolldown 官方建议写法。
         // 恢复单一大 vendors 包（不推荐）：仅保留 { test: /node_modules/, name: 'vendors' } 一个兜底分组。
         codeSplitting: {
           groups: [
-            { test: /node_modules\/(react|react-dom|react-router-dom|zustand|ahooks)/, name: 'react-vendor' },
-            { test: /node_modules\/@ant-design/, name: 'antd-icons-vendor' },
-            { test: /node_modules\/antd/, name: 'antd-vendor' },
-            { test: /node_modules\/(axios|lodash-es|qs|date-fns)/, name: 'utils-vendor' },
+            { test: /node_modules[\\/](react|react-dom|react-router-dom|zustand)/, name: 'react-vendor' },
+            { test: /node_modules[\\/]@ant-design/, name: 'antd-icons-vendor' },
+            { test: /node_modules[\\/]antd/, name: 'antd-vendor' },
+            { test: /node_modules[\\/](axios|lodash-es|qs|date-fns)/, name: 'utils-vendor' }, // 预留分组：这些依赖真正进入模块图后才会产出该 chunk（当前 apis/http/utils 未被入口引用，故暂无）
             { test: /node_modules/, name: 'vendors' } // 兜底分组：其余第三方依赖
           ]
         }
@@ -80,6 +79,7 @@ export function createNewBuildConfig(isBuild: boolean): BuildOptions {
       }
     }
     // 静态资源分类打包配置（等价于旧版 rollupOptions 静态资源分类块，如需启用请合并至上方 rolldownOptions.output）
+    // 注意：不可直接取消注释——对象字面量不允许重复声明 rolldownOptions（TS 报错），且后者会整体覆盖上方 minify / codeSplitting 配置。
     // https://vitejs.dev/config/build-options.html
     // rolldownOptions: {
     //   output: {

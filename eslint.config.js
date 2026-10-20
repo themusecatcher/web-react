@@ -27,7 +27,8 @@ export default tseslint.config(
       ...reactHooks.configs.flat.recommended.rules,
       'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
       // 添加自定义规则
-      '@typescript-eslint/no-explicit-any': 'off',
+      // any 不中断检查（存量 http 层仍有使用），但保持可见以约束新增代码
+      '@typescript-eslint/no-explicit-any': 'warn',
       '@typescript-eslint/no-unused-vars': 'off',
       '@typescript-eslint/no-unused-expressions': 'off',
       '@typescript-eslint/no-duplicate-enum-values': 'off',
