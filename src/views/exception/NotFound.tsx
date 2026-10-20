@@ -7,7 +7,8 @@ export default function NotFound() {
       title="404"
       subTitle="Sorry, the page you visited does not exist."
       extra={
-        <Button type="primary" href="/">
+        // 与 RouteError 保持一致：使用 BASE_URL，兼容 VITE_PUBLIC_PATH 非根路径部署
+        <Button type="primary" href={import.meta.env.BASE_URL}>
           Back Home
         </Button>
       }

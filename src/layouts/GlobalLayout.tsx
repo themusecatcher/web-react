@@ -12,7 +12,8 @@ export default function GlobalLayout() {
   useEffect(() => {
     const domTitle = title
     const appTitle = import.meta.env.VITE_GLOB_APP_TITLE
-    document.title = `${domTitle} - ${appTitle}`
+    // 末级路由未配置 handle.title 时不能拼出 "undefined - xxx"
+    document.title = domTitle ? `${domTitle} - ${appTitle}` : appTitle
     // 滚动行为
     window.scrollTo({ left: 0, top: 0, behavior: 'smooth' })
   }, [title, location.pathname])
