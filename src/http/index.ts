@@ -2,10 +2,11 @@ import type { AxiosResponse } from 'axios'
 import { VAxios } from './axios'
 import type { AxiosTransform, CreateAxiosOptions } from './axiosTransform'
 import axios from 'axios'
+import merge from 'lodash-es/merge'
 import { checkStatus } from './checkStatus'
 import { joinTimestamp, formatRequestDate } from './helper'
 import { isString } from 'utils/is'
-import { deepMerge, isUrl, setObjToUrlParams } from 'utils/index'
+import { isUrl, setObjToUrlParams } from 'utils/index'
 import { getGlobSetting } from 'hooks/setting'
 import { RequestEnum, ContentTypeEnum } from 'enums/httpEnum'
 // import { encryptData } from 'utils/signature/encrypt'
@@ -118,46 +119,47 @@ const transform: AxiosTransform = {
     return Promise.reject(response?.data ?? error)
   }
 }
+// 默认配置：显式标注类型，避免对象字面量的字面量类型被宽化成 string 后无法赋值给 CreateAxiosOptions
+const defaultOptions: CreateAxiosOptions = {
+  timeout: 30 * 1000,
+  authenticationScheme: '',
+  headers: { 'Content-Type': ContentTypeEnum.JSON },
+  transform,
+  // 配置项，下面的选项都可以在独立的接口请求中覆盖
+  requestOptions: {
+    // 默认将 prefix 添加到url
+    joinPrefix: true,
+    // 是否返回原生响应头 比如：需要获取响应头时使用该属性
+    isReturnNativeResponse: false,
+    // 需要对返回数据进行处理
+    isTransformResponse: true,
+    // post 请求的时候添加参数到 url
+    joinParamsToUrl: false,
+    // 格式化提交参数时间
+    formatDate: true,
+    // 消息提示类型
+    errorMessageMode: 'none',
+    // 接口地址
+    apiUrl: globSetting.apiUrl,
+    // 接口拼接地址
+    urlPrefix: urlPrefix,
+    //  是否加入时间戳
+    joinTime: true,
+    // 忽略重复请求
+    ignoreCancelToken: true,
+    // 是否携带token
+    withToken: true
+  },
+  withCredentials: true
+}
+
 function createAxios(opt?: Partial<CreateAxiosOptions>) {
-  return new VAxios(
-    deepMerge(
-      {
-        timeout: 30 * 1000,
-        authenticationScheme: '',
-        // 接口前缀
-        prefixUrl: urlPrefix,
-        headers: { 'Content-Type': ContentTypeEnum.JSON },
-        transform,
-        // 配置项，下面的选项都可以在独立的接口请求中覆盖
-        requestOptions: {
-          // 默认将 prefix 添加到url
-          joinPrefix: true,
-          // 是否返回原生响应头 比如：需要获取响应头时使用该属性
-          isReturnNativeResponse: false,
-          // 需要对返回数据进行处理
-          isTransformResponse: true,
-          // post 请求的时候添加参数到 url
-          joinParamsToUrl: false,
-          // 格式化提交参数时间
-          formatDate: true,
-          // 消息提示类型
-          errorMessageMode: 'none',
-          // 接口地址
-          apiUrl: globSetting.apiUrl,
-          // 接口拼接地址
-          urlPrefix: urlPrefix,
-          //  是否加入时间戳
-          joinTime: true,
-          // 忽略重复请求
-          ignoreCancelToken: true,
-          // 是否携带token
-          withToken: true
-        },
-        withCredentials: true
-      },
-      opt || {}
-    )
-  )
+  // 用 lodash merge 代替自研 deepMerge：
+  // - source 为 undefined 时不覆盖默认值，符合「局部覆盖」的配置语义
+  // - 已内置 __proto__ / constructor 原型污染防护
+  // 注意：lodash merge 对数组按下标合并（[9] 合入 [1,2,3] 得到 [9,2,3]），
+  // 后续给配置项加数组类型时需显式整体替换，否则会残留默认项
+  return new VAxios(merge(defaultOptions, opt || {}))
 }
 
 export const http = createAxios()
