@@ -3,7 +3,7 @@ import { App as AntdApp, ConfigProvider } from 'antd'
 import { RouterProvider } from 'react-router-dom'
 import router from './router'
 
-// antd 主题配置（对应原模板 vue-amazing-ui 的 ConfigProvider theme）
+// antd 主题配置
 const theme = {
   token: {
     colorPrimary: '#ff6900'
@@ -11,17 +11,15 @@ const theme = {
 }
 
 function AppContent() {
-  // 通过 antd App 组件获取 message / modal 实例，挂载到 window 供非组件上下文（如 axios 拦截器）调用
-  const { message, modal } = AntdApp.useApp()
+  // 通过 antd App 组件获取 message 实例，挂载到 window 供非组件上下文（如 axios 拦截器）调用
+  const { message } = AntdApp.useApp()
 
   useEffect(() => {
     window.$message = message
-    window.$modal = modal
     return () => {
       delete window.$message
-      delete window.$modal
     }
-  }, [message, modal])
+  }, [message])
 
   return <RouterProvider router={router} />
 }
